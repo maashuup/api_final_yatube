@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'hhz7l-ltdismtf@bzyz+rple7*s*w$jak%whj@(@u0eok^f9k4'
@@ -17,7 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'rest_framework',
-    'rest_framework.authtoken',
+    'djoser',
     'api',
     'posts',
 ]
@@ -94,6 +95,8 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+
+USE_L10N = True
 
 USE_TZ = True
 

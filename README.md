@@ -18,7 +18,7 @@ API реализовано с использованием Django REST Framework
 
 - Python 3.9+
 - Django 4.0+
-- Django REST Framework (DRF) 3.12+
+- Django REST Framework (DRF) 3.14+
 - SimpleJWTм
 
 ## Запуск проекта
