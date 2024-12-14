@@ -1,9 +1,6 @@
 from rest_framework import permissions, viewsets
 from rest_framework.exceptions import ValidationError
-from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
-
-from django_filters.rest_framework import DjangoFilterBackend
 
 from posts.models import Comment, Follow, Group, Post
 from .permissions import IsAuthorOrReadOnly
@@ -19,8 +16,6 @@ class PostViewSet(viewsets.ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly
     ]
     pagination_class = LimitOffsetPagination
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['author', 'group']
 
     def perform_create(self, serializer):
         group_id = self.request.data.get('group')
@@ -38,13 +33,14 @@ class FollowViewSet(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['user', 'following']
-    search_fields = ['following__username']
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Follow.objects.filter(user=self.request.user)
+        search_query = self.request.query_params.get('search')
+        return Follow.objects.filter(
+            user=self.request.user,
+            following__username__icontains=search_query if search_query else ''
+        )
 
     def perform_create(self, serializer):
         if self.request.user == serializer.validated_data['following']:
