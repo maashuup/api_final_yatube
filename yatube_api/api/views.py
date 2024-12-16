@@ -1,11 +1,16 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
-from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 
 from posts.models import Comment, Follow, Group, Post
+
+from .filters import FollowFilter
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
-    CommentSerializer, FollowSerializer, GroupSerializer, PostSerializer
+    CommentSerializer,
+    FollowSerializer,
+    GroupSerializer,
+    PostSerializer,
 )
 
 
@@ -18,40 +23,21 @@ class PostViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
-        group_id = self.request.data.get('group')
-        if group_id:
-            try:
-                group = Group.objects.get(id=group_id)
-                serializer.save(author=self.request.user, group=group)
-            except Group.DoesNotExist:
-                raise ValidationError('Группа с таким ID не существует')
-        else:
-            serializer.save(author=self.request.user)
+        serializer.save(author=self.request.user)
 
 
 class FollowViewSet(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = FollowFilter
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        search_query = self.request.query_params.get('search')
-        return Follow.objects.filter(
-            user=self.request.user,
-            following__username__icontains=search_query if search_query else ''
-        )
+        return Follow.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        if self.request.user == serializer.validated_data['following']:
-            raise ValidationError('Нельзя подписаться на самого себя')
-
-        if Follow.objects.filter(
-            user=self.request.user,
-            following=serializer.validated_data['following']
-        ).exists():
-            raise ValidationError('Вы уже подписаны на этого пользователя')
-
         serializer.save(user=self.request.user)
 
 

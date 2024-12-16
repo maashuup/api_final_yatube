@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 79
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"  # Используем профиль Black
+known_first_party = ["api", "posts"]  # Указываем локальные приложения
+line_length = 79  # Длина строки (совместимо с Black)
+multi_line_output = 3  # Многострочные импорты
+combine_as_imports = true  # Объединяем 'as' импорты
+order_by_type = true  # Сортируем импорты по типу
